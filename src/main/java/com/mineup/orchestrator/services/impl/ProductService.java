@@ -7,6 +7,7 @@ import com.mineup.orchestrator.mappers.spec.IProductMapper;
 import com.mineup.orchestrator.repositories.ProductRepository;
 import com.mineup.orchestrator.services.spec.IProductService;
 import com.mineup.orchestrator.utils.StringUtils;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -32,6 +33,7 @@ public class ProductService implements IProductService {
         return productRepository.findAllByIsDeletedAndCategoryId(false, sort, categoryId)
                 .flatMap(entity-> Flux.just(productMapper.toDto(entity)));
     }
+    @CacheEvict(value = "productByCategories", allEntries = true)
     public Mono<ProductDtoResponse> createProduct(ProductDtoRequest product, String categoryId) {
 
         String nameWithoutAccents = StringUtils.removeAccents(product.getName());
@@ -41,7 +43,7 @@ public class ProductService implements IProductService {
                 .flatMap(ExistMembership -> Mono.<ProductDtoResponse>error(new ResourceAlreadyExistsException("Product already exists and is not deleted")))
                 .switchIfEmpty(saveProduct(product,categoryId));
     }
-
+    @CacheEvict(value = "productByCategories", allEntries = true)
     public void deleteProduct(String id) {
         productRepository.findById(id)
                 .flatMap(product -> {

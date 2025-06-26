@@ -5,6 +5,7 @@ import com.mineup.orchestrator.dto.requests.MineralDtoRequest;
 import com.mineup.orchestrator.dto.requests.ProductDtoRequest;
 import com.mineup.orchestrator.dto.responses.CategoryDtoResponse;
 import com.mineup.orchestrator.dto.responses.MineralDtoResponse;
+import com.mineup.orchestrator.dto.responses.ProductByCategoryDtoResponse;
 import com.mineup.orchestrator.dto.responses.ProductDtoResponse;
 import com.mineup.orchestrator.services.impl.CategoryService;
 import com.mineup.orchestrator.services.impl.MineralService;
@@ -16,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1/categories")
@@ -69,6 +72,10 @@ public class CategoryController {
     @PostMapping("/{id}/products")
     public ResponseEntity<Mono<ProductDtoResponse>> createProduct(@RequestBody ProductDtoRequest product, @PathVariable String id) {
         return ResponseEntity.ok(productService.createProduct(product,id));
+    }
+    @GetMapping("/products")
+    public ResponseEntity<Mono<List<ProductByCategoryDtoResponse>>> getProductsByCategoryI() {
+        return ResponseEntity.ok(categoryService.findProductsByCategory());
     }
 /*
     @PutMapping("/{id}")

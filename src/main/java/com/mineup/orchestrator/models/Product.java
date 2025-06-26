@@ -9,6 +9,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+
 @Document(collection = "products")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,6 +23,7 @@ public class Product {
     @Indexed
     private String categoryId;
     private ProductTypeEnum type;
+    private List<String> photos;
     private Boolean isDeleted;
     private Boolean isVerified;
 }
