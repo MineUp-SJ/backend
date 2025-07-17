@@ -2,7 +2,7 @@ package com.mineup.orchestrator.application.service;
 
 import com.mineup.orchestrator.domain.model.Category;
 import com.mineup.orchestrator.domain.port.out.CategoryRepository;
-import com.mineup.orchestrator.exceptions.ResourceAlreadyExistsException;
+import com.mineup.orchestrator.domain.exceptions.ResourceAlreadyExistsException;
 import com.mineup.orchestrator.domain.port.in.ICategoryService;
 import com.mineup.orchestrator.utils.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;

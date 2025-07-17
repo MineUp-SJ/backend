@@ -1,5 +1,6 @@
 package com.mineup.orchestrator.adapter.in.web;
 
+import com.mineup.orchestrator.adapter.in.exceptions.RequestBodyPathException;
 import com.mineup.orchestrator.adapter.in.mapper.MineralWebMapper;
 import com.mineup.orchestrator.domain.model.Mineral;
 import com.mineup.orchestrator.adapter.in.dto.MineralDtoRequest;
@@ -7,6 +8,7 @@ import com.mineup.orchestrator.adapter.in.dto.MineralDtoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import com.mineup.orchestrator.application.service.MineralService;
 import reactor.core.publisher.Flux;
@@ -46,14 +48,20 @@ public class MineralController {
           @ApiResponse(responseCode = "500", description = "Internal server error")
   })
     @PostMapping
-    public Mono<MineralDtoResponse> createMineral(@RequestBody MineralDtoRequest mineral) {
+    public Mono<MineralDtoResponse> createMineral(@Valid @RequestBody MineralDtoRequest mineral) {
+      if (mineral == null || mineral.getName() == null || mineral.getName().isEmpty()) {
+          return Mono.error(new RequestBodyPathException("Mineral name must not be null or empty"));
+      }
       Mineral request = mineralWebMapper.toDomain(mineral);
         return mineralService.createMineral(request)
                 .map(mineralWebMapper::toDto);
     }
     @DeleteMapping("/{id}")
-    public void deleteMineral(@PathVariable String id) {
-        mineralService.deleteMineral(id);
+    public void deleteMineral(@Valid @PathVariable String id) {
+      if(id == null || id.isEmpty()) {
+          throw new RequestBodyPathException("Mineral ID must not be null or empty");
+      }
+      mineralService.deleteMineral(id);
     }
 /*
     @PutMapping("/{id}")

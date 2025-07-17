@@ -1,6 +1,7 @@
 package com.mineup.orchestrator.adapter.in.web;
 
 import com.mineup.orchestrator.adapter.in.dto.CategoryDtoRequest;
+import com.mineup.orchestrator.adapter.in.exceptions.RequestBodyPathException;
 import com.mineup.orchestrator.adapter.in.mapper.CategoryWebMapper;
 import com.mineup.orchestrator.adapter.in.mapper.ProductWebMapper;
 import com.mineup.orchestrator.domain.model.Category;
@@ -14,6 +15,7 @@ import com.mineup.orchestrator.application.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +46,8 @@ public class CategoryController {
     @Operation(summary = "Get all categories", description = "Retrieve a list of all categories")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved list"),
+            @ApiResponse(responseCode = "204", description = "No categories found"),
+            @ApiResponse(responseCode = "400", description = "Bad request"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
@@ -53,7 +57,10 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public Flux<CategoryDtoResponse> getCategoriesByParentId(@PathVariable String id) {
+    public Flux<CategoryDtoResponse> getCategoriesByParentId(@Valid @PathVariable String id) {
+        if (id == null || id.isEmpty()) {
+            return Flux.error(new RequestBodyPathException("Parent ID must not be null or empty"));
+        }
         return categoryService.findAll(id)
                 .map(categoryWebMapper::toDto);
     }
@@ -64,7 +71,10 @@ public class CategoryController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
-    public Mono<CategoryDtoResponse> createCategory(@RequestBody CategoryDtoRequest category) {
+    public Mono<CategoryDtoResponse> createCategory(@Valid @RequestBody CategoryDtoRequest category) {
+        if (category == null || category.getName() == null || category.getName().isEmpty()) {
+            return Mono.error(new RequestBodyPathException("Category name must not be null or empty"));
+        }
         Category request = Category.builder()
                 .name(category.getName())
                 .build();
@@ -74,7 +84,13 @@ public class CategoryController {
     }
 
     @PostMapping("/{id}")
-    public Mono<CategoryDtoResponse> createCategory(@RequestBody CategoryDtoRequest category, @PathVariable String id) {
+    public Mono<CategoryDtoResponse> createCategory(@Valid @RequestBody CategoryDtoRequest category, @Valid @PathVariable String id) {
+        if (category == null || category.getName() == null || category.getName().isEmpty()) {
+            return Mono.error(new RequestBodyPathException("Category name must not be null or empty"));
+        }
+        if (id == null || id.isEmpty()) {
+            return Mono.error(new RequestBodyPathException("Category ID must not be null or empty"));
+        }
         Category request = Category.builder()
                 .name(category.getName())
                 .build();
@@ -84,18 +100,30 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteCategory(@PathVariable String id) {
+    public void deleteCategory(@Valid @PathVariable String id) {
+        if (id == null || id.isEmpty()) {
+            throw new RequestBodyPathException("Category ID must not be null or empty");
+        }
         categoryService.deleteCategory(id);
     }
 
     @GetMapping("/{id}/products")
-    public Flux<ProductDtoResponse> getProductsByCategoryId(@PathVariable String id) {
+    public Flux<ProductDtoResponse> getProductsByCategoryId(@Valid @PathVariable String id) {
+        if (id == null || id.isEmpty()) {
+            return Flux.error(new RequestBodyPathException("Category ID must not be null or empty"));
+        }
         return productService.findAll(id)
                 .map(productWebMapper::toDto);
     }
 
     @PostMapping("/{id}/products")
-    public Mono<ProductDtoResponse> createProduct(@RequestBody ProductDtoRequest product, @PathVariable String id) {
+    public Mono<ProductDtoResponse> createProduct(@Valid @RequestBody ProductDtoRequest product, @Valid @PathVariable String id) {
+        if (product == null || product.getName() == null || product.getName().isEmpty()) {
+            return Mono.error(new RequestBodyPathException("Product name must not be null or empty"));
+        }
+        if (id == null || id.isEmpty()) {
+            return Mono.error(new RequestBodyPathException("Category ID must not be null or empty"));
+        }
         //todo validate product name and type
         Product request = Product.builder()
                 .name(product.getName())

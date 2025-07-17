@@ -3,7 +3,7 @@ package com.mineup.orchestrator.application.service;
 import com.mineup.orchestrator.domain.model.Profile;
 import com.mineup.orchestrator.domain.port.in.IProfileService;
 import com.mineup.orchestrator.domain.port.out.ProfileRepository;
-import com.mineup.orchestrator.exceptions.ResourceAlreadyExistsException;
+import com.mineup.orchestrator.domain.exceptions.ResourceAlreadyExistsException;
 
 
 import com.mineup.orchestrator.utils.StringUtils;

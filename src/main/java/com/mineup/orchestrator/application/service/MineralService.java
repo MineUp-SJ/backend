@@ -2,7 +2,7 @@ package com.mineup.orchestrator.application.service;
 
 import com.mineup.orchestrator.domain.model.Mineral;
 import com.mineup.orchestrator.domain.port.out.MineralRepository;
-import com.mineup.orchestrator.exceptions.ResourceAlreadyExistsException;
+import com.mineup.orchestrator.domain.exceptions.ResourceAlreadyExistsException;
 
 
 import com.mineup.orchestrator.domain.port.in.IMineralService;

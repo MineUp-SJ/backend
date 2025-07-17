@@ -5,7 +5,7 @@ import com.mineup.orchestrator.domain.model.Product;
 import com.mineup.orchestrator.domain.port.in.IProductService;
 import com.mineup.orchestrator.domain.port.out.ProductRepository;
 
-import com.mineup.orchestrator.exceptions.ResourceAlreadyExistsException;
+import com.mineup.orchestrator.domain.exceptions.ResourceAlreadyExistsException;
 import com.mineup.orchestrator.utils.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Sort;
