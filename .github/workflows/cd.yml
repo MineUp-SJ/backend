@@ -1,0 +1,22 @@
+name: CD pipeline
+
+on:
+  workflow_run:
+    workflows: ["CI pipeline"]
+    types:
+      - completed
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - name: Pull docker image
+        run: sudo docker pull mineup/backend:latest
+      - name: Delete container and images
+        run: sudo docker system prune -a
+      - name: Delete old docker container
+        run: sudo docker rm -f backend || true
+      - name: Run docker container
+        env:
+          PORT: ${{ secrets.PORT }}
+        run: sudo docker run -d  --name backend -e PORT=$PORT -p 8080:8080 mineup/backend:latest
