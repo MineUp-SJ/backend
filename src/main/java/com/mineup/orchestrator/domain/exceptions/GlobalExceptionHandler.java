@@ -1,5 +1,6 @@
 package com.mineup.orchestrator.domain.exceptions;
 
+import com.mineup.orchestrator.adapter.in.exceptions.RequestBodyPathException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,6 +27,14 @@ public class GlobalExceptionHandler {
     public Mono<ResponseEntity<Map<String, Object>>> handleAlreadyExists(ResourceAlreadyExistsException ex) {
         Map<String, Object> body = new HashMap<>();
         body.put("error", "Already Exists");
+        body.put("message", ex.getMessage());
+        body.put("timestamp", LocalDateTime.now());
+        return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body));
+    }
+    @ExceptionHandler(RequestBodyPathException.class)
+    public Mono<ResponseEntity<Map<String, Object>>> handleBadParams(RequestBodyPathException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", "Bad request");
         body.put("message", ex.getMessage());
         body.put("timestamp", LocalDateTime.now());
         return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body));
