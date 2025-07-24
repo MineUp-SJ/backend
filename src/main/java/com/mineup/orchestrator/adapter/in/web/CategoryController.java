@@ -22,10 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/v1/categories")
@@ -52,7 +50,7 @@ public class CategoryController {
     })
     @GetMapping
     public Flux<CategoryDtoResponse> getCategories() {
-        return categoryService.findAll()
+        return categoryService.findAll(null)
                 .map(categoryWebMapper::toDto);
     }
 
@@ -107,14 +105,14 @@ public class CategoryController {
         categoryService.deleteCategory(id);
     }
 
-    @GetMapping("/{id}/products")
+   /* @GetMapping("/{id}/products")
     public Flux<ProductDtoResponse> getProductsByCategoryId(@Valid @PathVariable String id) {
         if (id == null || id.isEmpty()) {
             return Flux.error(new RequestBodyPathException("Category ID must not be null or empty"));
         }
         return productService.findAll(id)
                 .map(productWebMapper::toDto);
-    }
+    }*/
 
     @PostMapping("/{id}/products")
     public Mono<ProductDtoResponse> createProduct(@Valid @RequestBody ProductDtoRequest product, @Valid @PathVariable String id) {
@@ -131,6 +129,21 @@ public class CategoryController {
                 .build();
         return productService.createProduct(request, id)
                 .map(productWebMapper::toDto);
+    }
+
+    @GetMapping("/{id}/products")
+    public  Mono<ProductByCategoryDtoResponse> getProducts(@Valid @PathVariable String id) {
+
+        if (id == null || id.isEmpty()) {
+            return Mono.error(new RequestBodyPathException("Category ID must not be null or empty"));
+        }
+
+        return this.findProductsByCategory()
+                .flatMap(productByCategoryDtoResponses -> {
+                    Optional<ProductByCategoryDtoResponse> result = findCategoryById(productByCategoryDtoResponses, id);
+                    return result.map(Mono::just)
+                            .orElseGet(() -> Mono.error(new RequestBodyPathException("Category not found")));
+                });
     }
 
     @Cacheable(value = "productByCategories", key = "#root.method.name")
@@ -180,9 +193,20 @@ public class CategoryController {
                             }
                         }
                     }
-
                     return rootCategories;
                 });
+    }
+    private Optional<ProductByCategoryDtoResponse> findCategoryById(List<ProductByCategoryDtoResponse> categories, String id) {
+        for (ProductByCategoryDtoResponse category : categories) {
+            if (category.getId().equals(id)) {
+                return Optional.of(category);
+            }
+            Optional<ProductByCategoryDtoResponse> found = findCategoryById(category.getCategories(), id);
+            if (found.isPresent()) {
+                return found;
+            }
+        }
+        return Optional.empty();
     }
 /*
     @PutMapping("/{id}")
